@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Viabilidade - Escola</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS Personalizado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="bg-primary text-white py-4 mb-4 rounded-bottom shadow">
+            <div class="container">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-calculator me-3"></i>Calculadora de Viabilidade - Escola
+                </h1>
+                <p class="lead mb-0">Análise financeira completa para sua instituição de ensino</p>
+            </div>
+        </header>
+
+        <div class="row g-4">
+            <!-- Coluna Esquerda: Configurações -->
+            <div class="col-lg-6">
+                <!-- Níveis de Ensino -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i>Níveis de Ensino</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            {% for nivel in niveis %}
+                            <div class="col-md-6">
+                                <div class="card nivel-card h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">{{ nivel.nome }}</h6>
+                                        <p class="card-text text-muted small">{{ nivel.descricao }}</p>
+                                        <button class="btn btn-outline-primary btn-sm btn-selecionar-nivel w-100" 
+                                                data-nivel="{{ nivel.id }}">
+                                            Selecionar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3 p-2 bg-light rounded">
+                            <strong>Selecionados:</strong> 
+                            <span id="niveis-selecionados-texto">Nenhum</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disciplinas -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-book me-2"></i>Disciplinas Oferecidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Selecione as disciplinas que serão oferecidas:</p>
+                        <div class="row g-2" id="disciplinas-container">
+                            {% for disciplina in disciplinas %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-check disciplina-item p-2 border rounded">
+                                    <input class="form-check-input checkbox-disciplina" 
+                                           type="checkbox" 
+                                           value="{{ disciplina.id }}"
+                                           id="disciplina-{{ disciplina.id }}"
+                                           data-nome="{{ disciplina.nome }}"
+                                           data-custo="{{ disciplina.custo_hora }}">
+                                    <label class="form-check-label w-100" for="disciplina-{{ disciplina.id }}">
+                                        <strong>{{ disciplina.nome }}</strong>
+                                        <span class="badge bg-success float-end">R$ {{ disciplina.custo_hora }}/h</span>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custos Fixos -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Custos Fixos Mensais</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Infraestrutura -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-building me-2"></i>Infraestrutura</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Aluguel:</label>
+                                    <input type="number" class="form-control custo-fixo" id="aluguel" min="0" step="100" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Condomínio:</label>
+                                    <input type="number" class="form-control custo-fixo" id="condominio" min="0" step="100" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Água:</label>
+                                    <input type="number" class="form-control custo-fixo" id="agua" min="0" step="10" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Energia:</label>
+                                    <input type="number" class="form-control custo-fixo" id="energia" min="0" step="10" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Internet:</label>
+                                    <input type="number" class="form-control custo-fixo" id="internet" min="0" step="10" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Limpeza:</label>
+                                    <input type="number" class="form-control custo-fixo" id="limpeza" min="0" step="10" placeholder="R$ 0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Equipamentos -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-laptop me-2"></i>Equipamentos</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Projetor:</label>
+                                    <input type="number" class="form-control custo-fixo" id="projetor" min="0" step="50" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Computadores:</label>
+                                    <input type="number" class="form-control custo-fixo" id="computadores" min="0" step="100" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Móveis:</label>
+                                    <input type="number" class="form-control custo-fixo" id="moveis" min="0" step="100" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ar condicionado:</label>
+                                    <input type="number" class="form-control custo-fixo" id="arcondicionado" min="0" step="50" placeholder="R$ 0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Marketing -->
+                        <div>
+                            <h6><i class="fas fa-bullhorn me-2"></i>Marketing</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Divulgação:</label>
+                                    <input type="number" class="form-control custo-fixo" id="divulgacao" min="0" step="100" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Material gráfico:</label>
+                                    <input type="number" class="form-control custo-fixo" id="material_grafico" min="0" step="50" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Site:</label>
+                                    <input type="number" class="form-control custo-fixo" id="site" min="0" step="50" placeholder="R$ 0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Redes sociais:</label>
+                                    <input type="number" class="form-control custo-fixo" id="redes_sociais" min="0" step="50" placeholder="R$ 0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna Direita: Turmas e Resultados -->
+            <div class="col-lg-6">
+                <!-- Turmas -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-users me-2"></i>Turmas</h5>
+                        <button class="btn btn-success btn-sm" id="btn-nova-turma">
+                            <i class="fas fa-plus me-1"></i>Nova Turma
+                        </button>
+                    </div>
+                    <div class="card-body p-3">
+                        <div id="turmas-container" class="turmas-container">
+                            {% if turmas %}
+                                {% for turma in turmas %}
+                                <div class="turma-card mb-3 border rounded" data-turma-id="{{ turma.id }}">
+                                    <div class="turma-header p-3 bg-light" onclick="toggleTurma({{ turma.id }})">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    {% for disciplina in disciplinas %}
+                                                        {% if disciplina.id == turma.disciplina_id %}
+                                                            {{ disciplina.nome }}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    <span class="badge bg-secondary ms-2">
+                                                        {% for nivel in niveis %}
+                                                            {% if nivel.id == turma.nivel_id %}
+                                                                {{ nivel.nome }}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </span>
+                                                </h6>
+                                                <p class="mb-0 text-muted small">
+                                                    <i class="fas fa-user-friends me-1"></i>
+                                                    {{ turma.alunos_matriculados }}/{{ turma.capacidade }} alunos
+                                                    <span class="mx-2">•</span>
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    {{ turma.horas_semana }}h/semana
+                                                    <span class="mx-2">•</span>
+                                                    <i class="fas fa-calendar-alt me-1"></i>
+                                                    {{ turma.dias_semana }} dias/semana
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <span class="badge resultado-turma" id="resultado-turma-{{ turma.id }}">
+                                                    Calculando...
+                                                </span>
+                                                <button class="btn btn-sm btn-outline-secondary ms-2 toggle-btn">
+                                                    <i class="fas fa-chevron-down"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Detalhes da Turma (Inicialmente oculto) -->
+                                    <div class="turma-detalhes p-3 border-top" id="detalhes-turma-{{ turma.id }}" style="display: none;">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Disciplina:</label>
+                                                <select class="form-select form-select-sm campo-turma" data-turma-id="{{ turma.id }}" data-campo="disciplina_id">
+                                                    <option value="">Selecione...</option>
+                                                    {% for disciplina in disciplinas %}
+                                                    <option value="{{ disciplina.id }}" 
+                                                            {% if turma.disciplina_id == disciplina.id %}selected{% endif %}>
+                                                        {{ disciplina.nome }} (R$ {{ disciplina.custo_hora }}/h)
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Nível:</label>
+                                                <select class="form-select form-select-sm campo-turma" data-turma-id="{{ turma.id }}" data-campo="nivel_id">
+                                                    <option value="">Selecione...</option>
+                                                    {% for nivel in niveis %}
+                                                    <option value="{{ nivel.id }}" 
+                                                            {% if turma.nivel_id == nivel.id %}selected{% endif %}>
+                                                        {{ nivel.nome }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Capacidade:</label>
+                                                <input type="number" class="form-control form-control-sm campo-turma" 
+                                                       data-turma-id="{{ turma.id }}" data-campo="capacidade"
+                                                       value="{{ turma.capacidade }}" min="1" max="100">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Alunos matriculados:</label>
+                                                <input type="number" class="form-control form-control-sm campo-turma" 
+                                                       data-turma-id="{{ turma.id }}" data-campo="alunos_matriculados"
+                                                       value="{{ turma.alunos_matriculados }}" min="0" max="{{ turma.capacidade }}">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Horas/semana:</label>
+                                                <input type="number" class="form-control form-control-sm campo-turma" 
+                                                       data-turma-id="{{ turma.id }}" data-campo="horas_semana"
+                                                       value="{{ turma.horas_semana }}" min="1" max="40" step="0.5">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Dias/semana:</label>
+                                                <input type="number" class="form-control form-control-sm campo-turma" 
+                                                       data-turma-id="{{ turma.id }}" data-campo="dias_semana"
+                                                       value="{{ turma.dias_semana }}" min="1" max="7">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Mensalidade/aluno (R$):</label>
+                                                <input type="number" class="form-control form-control-sm campo-turma" 
+                                                       data-turma-id="{{ turma.id }}" data-campo="mensalidade_aluno"
+                                                       value="{{ turma.mensalidade_aluno }}" min="0" step="10">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Custo material/mês (R$):</label>
+                                                <input type="number" class="form-control form-control-sm campo-turma" 
+                                                       data-turma-id="{{ turma.id }}" data-campo="custo_material_mes"
+                                                       value="{{ turma.custo_material_mes }}" min="0" step="10">
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 d-flex justify-content-between">
+                                            <button class="btn btn-danger btn-sm btn-remover-turma" data-turma-id="{{ turma.id }}">
+                                                <i class="fas fa-trash me-1"></i>Remover Turma
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="toggleTurma({{ turma.id }})">
+                                                <i class="fas fa-times me-1"></i>Fechar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <p class="mb-1">Nenhuma turma adicionada</p>
+                                    <p class="small">Clique em "Nova Turma" para começar</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Financeiro -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Resumo Financeiro</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light border h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-money-bill-wave me-2"></i>Receita Total
+                                        </h6>
+                                        <p class="display-6 fw-bold text-success" id="total-receita">R$ 0,00</p>
+                                        <p class="small text-muted">Soma de todas as mensalidades</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light border h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-chalkboard-teacher me-2"></i>Custos Variáveis
+                                        </h6>
+                                        <p class="display-6 fw-bold text-warning" id="total-custos-variaveis">R$ 0,00</p>
+                                        <p class="small text-muted">Professores + Material</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light border h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-home me-2"></i>Custos Fixos
+                                        </h6>
+                                        <p class="display-6 fw-bold text-purple" id="total-custos-fixos">R$ 0,00</p>
+                                        <p class="small text-muted">Infra + Equip. + Marketing</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light border h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title text-primary">
+                                            <i class="fas fa-balance-scale me-2"></i>Resultado Mensal
+                                        </h6>
+                                        <p class="display-6 fw-bold" id="resultado-mensal">R$ 0,00</p>
+                                        <p class="small text-muted">Receita - Custos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ACR -->
+                        <div class="card border">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-piggy-bank me-2"></i>Acumulado de Caixa (ACR)
+                                </h6>
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">ACR Inicial:</label>
+                                            <input type="number" class="form-control" id="acr-inicial" min="0" step="1000" placeholder="R$ 0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-center">
+                                            <p class="mb-1 text-muted small">Valor Atual do ACR</p>
+                                            <p class="display-5 fw-bold text-success" id="acr-atual">R$ 0,00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="small text-muted mb-0">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    ACR = ACR anterior + Resultado Mensal
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controles -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <button class="btn btn-primary btn-lg" id="btn-calcular">
+                                <i class="fas fa-calculator me-2"></i>Calcular Viabilidade
+                            </button>
+                            
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <button class="btn btn-info w-100" id="btn-exemplo">
+                                        <i class="fas fa-file-import me-2"></i>Carregar Exemplo
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-secondary w-100" id="btn-limpar">
+                                        <i class="fas fa-broom me-2"></i>Limpar Tudo
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-center gap-4 mt-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="legenda positiva me-2"></div>
+                                    <span class="small">Lucro</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="legenda negativa me-2"></div>
+                                    <span class="small">Prejuízo</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="legenda neutra me-2"></div>
+                                    <span class="small">Equilíbrio</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-4 py-3 text-center text-muted border-top">
+            <p class="mb-1">Calculadora de Viabilidade para Instituições de Ensino • v2.0</p>
+            <p class="small mb-0">Os cálculos são estimativas. Consulte um contador para análise precisa.</p>
+        </footer>
+    </div>
+
+    <!-- Modal para Nova Turma -->
+    <div class="modal fade" id="modalTurma" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus-circle me-2"></i>Nova Turma
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="modal-turma-body">
+                    <!-- Conteúdo será carregado via AJAX -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
