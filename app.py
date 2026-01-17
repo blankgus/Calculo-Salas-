@@ -214,16 +214,21 @@ def get_base_html(title="Viabilidade de Salas", content=""):
         
         .indicador {{
             text-align: center;
-            padding: 15px;
+            padding: 15px 10px;
             background: white;
             border-radius: 10px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }}
         
         .indicador .valor {{
-            font-size: 2em;
+            font-size: 1.5em;
             font-weight: 700;
             margin: 10px 0;
+            white-space: nowrap;
         }}
         
         .indicador .label {{
@@ -231,6 +236,33 @@ def get_base_html(title="Viabilidade de Salas", content=""):
             color: #666;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }}
+        
+        .indicador-horizontal {{
+            background: white;
+            border-radius: 10px;
+            padding: 20px 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }}
+        
+        .indicador-horizontal:hover {{
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }}
+        
+        .label-horizontal {{
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }}
+        
+        .valor-horizontal {{
+            font-size: 1.8em;
+            font-weight: 700;
+            white-space: nowrap;
         }}
         
         .table-custom {{
@@ -956,35 +988,44 @@ def simulacao(simulacao_id=None):
         
         // Atualizar display do resumo
         document.getElementById('resumo_financeiro').innerHTML = `
-            <div class="row text-center">
-                <div class="col-md-3 mb-3">
-                    <div class="indicador">
-                        <div class="label">Alunos</div>
-                        <div class="valor" style="color: #4361ee;">${{totalAlunosGeral}}</div>
-                        <small>Ocupação: ${{ocupacaoTotal.toFixed(1)}}%</small>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="indicador">
-                        <div class="label">Receita/Mês</div>
-                        <div class="valor" style="color: #28a745;">R$ ${{receitaTotal.toLocaleString('pt-BR', {{minimumFractionDigits: 2}})}}</div>
-                        <small>Ticket: R$ ${{ticketMedio.toFixed(2)}}</small>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="indicador">
-                        <div class="label">Custo/Mês</div>
-                        <div class="valor" style="color: #dc3545;">R$ ${{custoTotal.toLocaleString('pt-BR', {{minimumFractionDigits: 2}})}}</div>
-                        <small>Fixos: R$ ${{custosFixos.toLocaleString('pt-BR')}}</small>
-                    </div>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <div class="indicador">
-                        <div class="label">Lucro/Mês</div>
-                        <div class="valor" style="color: ${{lucroMensal >= 0 ? '#17a2b8' : '#dc3545'}};">
-                            R$ ${{lucroMensal.toLocaleString('pt-BR', {{minimumFractionDigits: 2}})}}
+            <div class="d-flex flex-column gap-3">
+                <div class="indicador-horizontal">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="label-horizontal">ALUNOS</div>
+                            <div class="small text-muted mt-1">Ocupação: ${{ocupacaoTotal.toFixed(1)}}%</div>
                         </div>
-                        <small>Margem: ${{margemLucro.toFixed(1)}}%</small>
+                        <div class="valor-horizontal" style="color: #4361ee;">${{totalAlunosGeral}}</div>
+                    </div>
+                </div>
+                
+                <div class="indicador-horizontal">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="label-horizontal">RECEITA/MÊS</div>
+                            <div class="small text-muted mt-1">Ticket: R$ ${{ticketMedio.toFixed(2)}}</div>
+                        </div>
+                        <div class="valor-horizontal" style="color: #28a745;">R$ ${{receitaTotal.toLocaleString('pt-BR', {{minimumFractionDigits: 2, maximumFractionDigits: 2}})}}</div>
+                    </div>
+                </div>
+                
+                <div class="indicador-horizontal">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="label-horizontal">CUSTO/MÊS</div>
+                            <div class="small text-muted mt-1">Fixos: R$ ${{custosFixos.toLocaleString('pt-BR', {{minimumFractionDigits: 2, maximumFractionDigits: 2}})}}</div>
+                        </div>
+                        <div class="valor-horizontal" style="color: #dc3545;">R$ ${{custoTotal.toLocaleString('pt-BR', {{minimumFractionDigits: 2, maximumFractionDigits: 2}})}}</div>
+                    </div>
+                </div>
+                
+                <div class="indicador-horizontal">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="label-horizontal">LUCRO/MÊS</div>
+                            <div class="small text-muted mt-1">Margem: ${{margemLucro.toFixed(1)}}%</div>
+                        </div>
+                        <div class="valor-horizontal" style="color: ${{lucroMensal >= 0 ? '#17a2b8' : '#dc3545'}};">R$ ${{lucroMensal.toLocaleString('pt-BR', {{minimumFractionDigits: 2, maximumFractionDigits: 2}})}}</div>
                     </div>
                 </div>
             </div>
